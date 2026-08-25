@@ -167,6 +167,24 @@ async function main() {
   }
   await writeFile(streamFile, lines.join('\n') + '\n---\n');
 
+  // Photos removed from the album leave their files behind. Drop anything no
+  // album references — checking every album, so the Zhanghattan set (which
+  // doesn't come from Photos) is never treated as an orphan.
+  const albumDir = path.join(root, 'src/content/albums');
+  const referenced = new Set();
+  for (const f of await readdir(albumDir)) {
+    if (!f.endsWith('.md')) continue;
+    const text = await readFile(path.join(albumDir, f), 'utf8');
+    for (const m of text.matchAll(/assets\/photos\/([^\s]+)/g)) referenced.add(m[1]);
+  }
+  let pruned = 0;
+  for (const f of await readdir(dest)) {
+    if (referenced.has(f)) continue;
+    await rm(path.join(dest, f));
+    pruned++;
+  }
+  if (pruned) console.log(`pruned ${pruned} image file(s) no longer in any album`);
+
   const located = entries.filter((e) => e.lat !== undefined).length;
   console.log(`stream.md: ${entries.length} photos (${located} geotagged), ${entries.at(-1).date} .. ${entries[0].date}`);
   if (prev.size) console.log(`carried over ${[...prev.values()].filter((v) => Object.keys(v).length).length} hand-edited entries`);
