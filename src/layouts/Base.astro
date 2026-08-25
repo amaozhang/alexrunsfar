@@ -1,0 +1,57 @@
+---
+import { site, nav } from '../lib/site';
+import '../styles/global.css';
+import '../styles/theme.css';
+
+interface Props { title?: string; description?: string; }
+const { title, description = site.bio } = Astro.props;
+const pageTitle = title ? `${title} — ${site.title}` : site.title;
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || path.startsWith(href + '/');
+---
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{pageTitle}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={new URL(path, site.url)} />
+  <meta property="og:title" content={pageTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-head">
+    <div class="wrap site-head__inner">
+      <a class="brand" href="/">Alex Runs Far</a>
+      <nav class="site-nav" aria-label="Primary">
+        <ul>
+          {nav.map((item) => (
+            <li><a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <slot />
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap site-foot__inner">
+      <p>&copy; {new Date().getFullYear()} Alex Zhang</p>
+      <p>
+        <a href={site.links.strava}>Strava</a> ·
+        <a href={site.links.ultrasignup}>UltraSignup</a> ·
+        <a href={site.links.linkedin}>LinkedIn</a>
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>

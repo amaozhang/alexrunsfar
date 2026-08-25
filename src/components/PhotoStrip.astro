@@ -1,0 +1,14 @@
+---
+import { Image } from 'astro:assets';
+interface Props { photos: { src: any; alt?: string }[] }
+const { photos } = Astro.props;
+---
+{/* One row, horizontally scrollable with snap. Costs a fixed ~19rem of height
+    no matter how many photos it holds. */}
+<div class="strip" tabindex="0" role="region" aria-label="Recent photographs">
+  {photos.map((p) => (
+    <figure class="strip__item">
+      <Image src={p.src} alt={p.alt ?? ''} widths={[300, 600]} sizes="18rem" loading="lazy" />
+    </figure>
+  ))}
+</div>

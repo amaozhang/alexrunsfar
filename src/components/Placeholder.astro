@@ -1,0 +1,5 @@
+---
+interface Props { label?: string; }
+const { label = 'Photo' } = Astro.props;
+---
+<div class="ph"><span>{label}</span></div>

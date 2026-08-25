@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { fmtDate } from '../../lib/races';
+
+const posts = (await getCollection('writing'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+<Base title="Writing" description="Race reports and essays on running by Alex Zhang.">
+  <div class="wrap page-head">
+    <p class="eyebrow">Words</p>
+    <h1 class="page-title">Writing</h1>
+    <p class="lede">Race reports and the occasional essay. Infrequent by design.</p>
+  </div>
+
+  <div class="wrap section">
+    {posts.length ? (
+      <div class="grid grid--2">
+        {posts.map((p) => (
+          <a class="card" href={p.data.external ?? `/writing/${p.id}`} rel={p.data.external ? 'noopener' : undefined}>
+            <h2 class="card__title">{p.data.title}</h2>
+            <p class="card__meta">{fmtDate(p.data.date)}{p.data.external && ' · Medium ↗'}</p>
+            <p style="margin-block-start:0.6rem;color:var(--ink-soft)">{p.data.description}</p>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <p class="empty">Nothing published yet. Copy <code>src/content/writing/_TEMPLATE.md</code> to start a post.</p>
+    )}
+  </div>
+</Base>

@@ -1,0 +1,337 @@
+/* ---------------------------------------------------------------------------
+   alexrunsfar.com — "Poster"
+   Built on Denise's design system: her palette (lime #D3F355, navy #141D4F,
+   cream #EEE8CC, red #D4414F), her display face (New Amsterdam), her handwritten
+   accent (Mynerve), and the marquee. The STRUCTURE is new — the old layout is
+   not assumed. Loud, graphic, race-poster energy.
+--------------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=New+Amsterdam&family=Outfit:wght@300;400;500;700&family=Mynerve&display=swap');
+
+:root {
+  --lime: #d3f355;
+  --navy: #141d4f;
+  --cream: #eee8cc;
+  --red: #d4414f;
+  --forest: #12362d;
+  --orange: #ea5f38;
+
+  --bg: var(--cream);
+  --bg-soft: #e2dcbe;
+  --bg-head: color-mix(in srgb, var(--cream) 90%, transparent);
+  --ink: var(--navy);
+  --ink-soft: #5a608a;
+  --accent: var(--red);
+  --accent-ink: #ffffff;
+  --accent-ink-on-bg: var(--red);
+  --rule-color: color-mix(in srgb, var(--navy) 22%, transparent);
+  --rule: 1px solid var(--rule-color);
+  --radius: 0px;
+
+  --font-display: 'New Amsterdam', 'Haettenschweiler', 'Arial Narrow', sans-serif;
+  --font-body: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --display-tracking: 0.01em;
+  --display-case: uppercase;
+}
+
+.site-head { border-block-end: 2px solid var(--navy); }
+.brand { font-size: var(--step-2); }
+.section__head { border-block-end: 2px solid var(--navy); }
+.ledger td { border-block-start: 1px solid var(--rule-color); }
+.ledger tr:hover td { background: var(--lime); }
+.stat__num { color: var(--navy); }
+
+/* Hero: full-bleed photo, oversized condensed type, lime slab */
+.hero { position: relative; background: var(--navy); color: var(--cream); overflow: hidden; }
+.hero__media { position: absolute; inset: 0; opacity: 0.55; }
+.hero__media img, .hero__media .ph { width: 100%; height: 100%; object-fit: cover; }
+.hero__body { position: relative; padding-block: clamp(3.5rem, 12vw, 8rem); }
+.hero__title { font-family: var(--font-display); font-size: var(--step-5); line-height: 0.82; text-transform: uppercase; letter-spacing: 0.005em; color: var(--lime); }
+.hero__sub { font-family: 'Mynerve', cursive; font-size: var(--step-1); max-width: 32ch; margin-block-start: 1.25rem; color: var(--cream); }
+.hero__next { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem; margin-block-start: 2rem; background: var(--lime); color: var(--navy); padding: 0.7rem 1.1rem; font-size: var(--step--1); letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; font-weight: 600; }
+.hero__next:hover { background: var(--red); color: #fff; }
+
+/* Marquee — Denise's ticker, now driven by real race data */
+.marquee { background: var(--red); color: #fff; border-block: 2px solid var(--navy); overflow: hidden; padding-block: 0.6rem; }
+.marquee__track { display: flex; width: max-content; animation: slide 38s linear infinite; }
+.marquee__item { font-family: var(--font-display); font-size: var(--step-1); text-transform: uppercase; letter-spacing: 0.06em; padding-inline-end: 2.5rem; white-space: nowrap; }
+@keyframes slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .marquee__track { animation: none; } }
+
+/* Featured race — lime panel behind an offset photo */
+.feature { position: relative; display: grid; gap: clamp(1.5rem, 4vw, 3rem); align-items: center; }
+@media (min-width: 52rem) { .feature { grid-template-columns: 1.1fr 1fr; } }
+.feature__media { aspect-ratio: 5 / 4; overflow: hidden; border: 2px solid var(--navy); background: var(--lime); }
+.feature__media img, .feature__media .ph { width: 100%; height: 100%; object-fit: cover; }
+.feature__title { font-family: var(--font-display); font-size: var(--step-4); line-height: 0.85; text-transform: uppercase; }
+.feature__row { display: flex; flex-wrap: wrap; gap: 0 2rem; margin-block-start: 1.5rem; padding: 1.1rem; background: var(--lime); font-variant-numeric: tabular-nums; }
+.feature__row div { min-width: 5rem; }
+.feature__row dt { font-size: var(--step--1); letter-spacing: 0.12em; text-transform: uppercase; color: var(--navy); opacity: 0.7; }
+.feature__row dd { font-family: var(--font-display); font-size: var(--step-2); margin: 0.1rem 0 0; color: var(--navy); }
+
+.tag--next { background: var(--lime); color: var(--navy); }
+.card__media { border: 2px solid var(--navy); }
+.more { border-block-end-width: 2px; font-weight: 600; }
+.site-foot { border-block-start: 2px solid var(--navy); }
+
+/* --- Photography ----------------------------------------------------------
+   Landscapes are the highest-volume content and the thing people comment on,
+   so they get room. A photo flagged `wide: true` spans two columns; the grid
+   backfills the gaps so the wall stays tight.
+-------------------------------------------------------------------------- */
+.pgrid {
+  columns: 3 18rem;
+  column-gap: clamp(0.5rem, 1.4vw, 1rem);
+}
+@media (max-width: 45rem) { .pgrid { columns: 2 10rem; } }
+.pgrid__item {
+  position: relative; margin: 0 0 clamp(0.5rem, 1.4vw, 1rem);
+  break-inside: avoid; -webkit-column-break-inside: avoid;
+  overflow: hidden; border: 2px solid var(--navy); background: var(--bg-soft);
+}
+.pgrid__item img { width: 100%; height: auto; display: block; transition: transform 0.6s cubic-bezier(0.2,0,0.2,1); }
+.pgrid__item:hover img { transform: scale(1.03); }
+.pgrid__item figcaption {
+  position: absolute; inset-inline: 0; inset-block-end: 0;
+  padding: 1.5rem 0.75rem 0.6rem;
+  font-size: var(--step--1); color: #fff;
+  background: linear-gradient(transparent, rgba(20,29,79,0.85));
+  opacity: 0; transition: opacity 0.25s;
+}
+.pgrid__item:hover figcaption, .pgrid__item:focus-within figcaption { opacity: 1; }
+
+/* Full-bleed photo band on the homepage — photography breaks the grid. */
+.band { background: var(--navy); padding-block: clamp(2.5rem, 6vw, 4.5rem); border-block: 2px solid var(--navy); }
+.band .section__title, .band .eyebrow { color: var(--lime); }
+.band .section__head { border-block-end-color: color-mix(in srgb, var(--lime) 40%, transparent); }
+.band .more { color: var(--lime); border-block-end-color: var(--lime); }
+.band .card__meta { color: color-mix(in srgb, var(--cream) 75%, transparent); }
+
+/* --- Someday --------------------------------------------------------------
+   Ideas, not results — so no time/place columns to leave empty.
+-------------------------------------------------------------------------- */
+.someday { list-style: none; padding: 0; display: grid; gap: 1px; background: var(--rule-color); border-block: 2px solid var(--navy); }
+@media (min-width: 46rem) { .someday { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); } }
+.someday__item { background: var(--bg); display: flex; flex-direction: column; }
+.someday__body { flex: 1; display: block; padding: clamp(1.1rem, 3vw, 1.75rem) clamp(1.1rem, 3vw, 1.75rem) 0.75rem; text-decoration: none; transition: background 0.2s; }
+.someday__body:hover { background: var(--lime); }
+.someday__cta {
+  display: block; margin: 0 clamp(1.1rem, 3vw, 1.75rem) clamp(1.1rem, 3vw, 1.75rem);
+  padding: 0.55rem 0.8rem; text-align: center; text-decoration: none;
+  border: 2px solid var(--navy); background: transparent;
+  font-size: var(--step--1); letter-spacing: 0.06em; font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+.someday__cta:hover { background: var(--navy); color: var(--lime); }
+.someday__dist { font-size: var(--step--1); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+.someday__name { font-family: var(--font-display); font-size: var(--step-2); text-transform: uppercase; line-height: 0.95; margin-block-start: 0.4rem; }
+.someday__where { font-size: var(--step--1); color: var(--ink-soft); margin-block-start: 0.2rem; }
+.someday__blurb { font-size: var(--step--1); margin-block-start: 0.75rem; }
+
+.album { margin-block-end: clamp(3rem, 7vw, 5rem); }
+.filters { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; }
+.filters__btn {
+  display: inline-block; padding: 0.4rem 0.9rem; text-decoration: none;
+  border: 2px solid var(--navy); font-size: var(--step--1);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.filters__btn[aria-current='true'] { background: var(--navy); color: var(--lime); }
+
+/* --- Course data ----------------------------------------------------------
+   Elevation profile and route trace, both rendered as inline SVG at build time.
+   No map tiles, no API keys, no runtime chart library.
+-------------------------------------------------------------------------- */
+.chart { margin: 0; border: 2px solid var(--navy); background: var(--bg); }
+.chart__head { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; align-items: baseline; justify-content: space-between; padding: 0.75rem 1rem; border-block-end: 1px solid var(--rule-color); }
+.chart__title { font-family: var(--font-display); font-size: var(--step-1); text-transform: uppercase; letter-spacing: 0.04em; }
+.chart__readout { font-size: var(--step--1); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart__grid line { stroke: var(--rule-color); stroke-width: 1; }
+.chart__ylab text, .chart__xlab text { fill: var(--ink-soft); font-size: 15px; font-family: var(--font-body); }
+.chart__area { fill: var(--lime); }
+.chart__line { fill: none; stroke: var(--navy); stroke-width: 2; stroke-linejoin: round; }
+.chart__peak { fill: var(--red); stroke: var(--bg); stroke-width: 2; }
+.chart__hover line { stroke: var(--navy); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart__hover circle { fill: var(--navy); stroke: var(--bg); stroke-width: 2; }
+.chart__hit { fill: transparent; cursor: crosshair; }
+
+.routemap { margin: 0; border: 2px solid var(--navy); background: var(--navy); padding: clamp(0.75rem, 2vw, 1.5rem); }
+/* Route shapes vary wildly — Tahoe is a tall portrait loop, Black Canyon a
+   wide diagonal. Cap the height so an extreme aspect can't tower over the
+   elevation chart beside it; preserveAspectRatio letterboxes the trace. */
+.routemap svg { display: block; width: 100%; height: auto; max-height: 30rem; }
+.routemap__shadow { fill: none; stroke: rgba(0, 0, 0, 0.35); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.routemap__line { fill: none; stroke: var(--lime); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.routemap__wpt { fill: var(--cream); opacity: 0.5; }
+.routemap__start { fill: var(--lime); stroke: var(--navy); stroke-width: 3; }
+.routemap__end { fill: var(--red); stroke: var(--navy); stroke-width: 3; }
+
+.coursegrid { display: grid; gap: clamp(1rem, 2.5vw, 1.5rem); }
+@media (min-width: 52rem) { .coursegrid { grid-template-columns: 1fr 1.3fr; align-items: start; } }
+
+/* --- Lightbox -------------------------------------------------------------
+   A <dialog> keeps its UA defaults (auto margins, a max-height that leaves room
+   for the page) unless every one of them is overridden — that's what let the
+   photo run off the bottom of the screen. Pin it to the viewport explicitly.
+-------------------------------------------------------------------------- */
+.lb::backdrop { background: rgba(10, 16, 46, 0.97); }
+.lb {
+  /* The dim lives on the dialog too, not only ::backdrop — the dialog fills the
+     viewport, so this is what actually guarantees the page is covered. */
+  background: rgba(10, 16, 46, 0.97);
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  max-width: none; max-height: none;
+  margin: 0; padding: 0; border: 0;
+  color: var(--cream);
+  overflow: hidden;
+}
+.lb[open] { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; }
+
+.lb__stage {
+  grid-column: 2; margin: 0; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.75rem; height: 100%; padding-block: 4rem 3rem;
+}
+.lb__img {
+  min-height: 0; max-width: 100%; max-height: 100%;
+  object-fit: contain; border: 2px solid var(--lime); background: var(--navy);
+}
+.lb__cap { flex: 0 0 auto; font-size: var(--step--1); text-align: center; color: var(--cream); }
+
+.lb__bar {
+  position: absolute; inset-block-start: 0; inset-inline: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1rem;
+}
+.lb__count { font-size: var(--step--1); letter-spacing: 0.14em; color: var(--lime); font-variant-numeric: tabular-nums; }
+.lb__nav, .lb__close {
+  background: transparent; border: 0; color: var(--lime); cursor: pointer;
+  line-height: 1; font-family: var(--font-body); padding: 0.5rem 1rem;
+}
+.lb__nav { font-size: 3rem; }
+.lb__close { font-size: 2rem; padding: 0 0.5rem; }
+.lb__nav:hover, .lb__close:hover { color: #fff; }
+.lb__nav--prev { grid-column: 1; }
+.lb__nav--next { grid-column: 3; }
+
+@media (max-width: 40rem) {
+  .lb__nav { font-size: 2rem; padding: 0.25rem 0.4rem; }
+  .lb__stage { padding-block: 3.5rem 2.5rem; }
+}
+
+.pgrid__item button { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+
+/* --- Hero carousel -------------------------------------------------------- */
+.carousel { position: absolute; inset: 0; }
+.carousel__slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.1s ease-in-out; }
+.carousel__slide[data-active] { opacity: 1; }
+.carousel__slide img { width: 100%; height: 100%; object-fit: cover; }
+.carousel__dots {
+  position: absolute; inset-block-end: 1rem; inset-inline-end: 1.25rem; z-index: 3;
+  display: flex; gap: 0.4rem;
+}
+.carousel__dots button {
+  width: 0.55rem; height: 0.55rem; padding: 0; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--lime); background: transparent; transition: background 0.2s;
+}
+.carousel__dots button[aria-selected='true'] { background: var(--lime); }
+@media (prefers-reduced-motion: reduce) { .carousel__slide { transition: none; } }
+
+/* --- Homepage photo section variants -------------------------------------- */
+.strip {
+  display: flex; gap: 0.75rem; overflow-x: auto; padding-block-end: 0.75rem;
+  scroll-snap-type: x mandatory; scrollbar-width: thin;
+}
+.strip__item { flex: 0 0 auto; width: 18rem; height: 13rem; margin: 0; scroll-snap-align: start;
+  border: 2px solid var(--lime); overflow: hidden; background: var(--navy); }
+.strip__item img { width: 100%; height: 100%; object-fit: cover; }
+
+.pgrid__item button { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+
+/* --- Hero carousel -------------------------------------------------------- */
+.carousel { position: absolute; inset: 0; }
+.carousel__slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.1s ease-in-out; }
+.carousel__slide[data-active] { opacity: 1; }
+.carousel__slide img { width: 100%; height: 100%; object-fit: cover; }
+.carousel__dots {
+  position: absolute; inset-block-end: 1rem; inset-inline-end: 1.25rem; z-index: 3;
+  display: flex; gap: 0.4rem;
+}
+.carousel__dots button {
+  width: 0.55rem; height: 0.55rem; padding: 0; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--lime); background: transparent; transition: background 0.2s;
+}
+.carousel__dots button[aria-selected='true'] { background: var(--lime); }
+@media (prefers-reduced-motion: reduce) { .carousel__slide { transition: none; } }
+
+/* --- Homepage photo section variants -------------------------------------- */
+.strip {
+  display: flex; gap: 0.75rem; overflow-x: auto; padding-block-end: 0.75rem;
+  scroll-snap-type: x mandatory; scrollbar-width: thin;
+}
+.strip__item { flex: 0 0 auto; width: 18rem; height: 13rem; margin: 0; scroll-snap-align: start;
+  border: 2px solid var(--lime); overflow: hidden; background: var(--navy); }
+.strip__item img { width: 100%; height: 100%; object-fit: cover; }
+
+.mosaic { display: grid; gap: 0.75rem; }
+@media (min-width: 52rem) { .mosaic { grid-template-columns: 1.6fr 1fr; height: 24rem; } }
+.mosaic figure { margin: 0; overflow: hidden; border: 2px solid var(--lime); background: var(--navy); }
+.mosaic figure img { width: 100%; height: 100%; object-fit: cover; }
+.mosaic__lead { min-height: 12rem; }
+.mosaic__rest { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0.75rem; }
+
+/* --- World map ------------------------------------------------------------ */
+.worldmap { margin: 0; }
+.worldmap svg { display: block; width: 100%; height: auto; background: var(--navy); border: 2px solid var(--navy); }
+.worldmap__land { fill: #1e2a63; stroke: #33407f; stroke-width: 0.6; }
+.worldmap__pin { cursor: pointer; }
+.worldmap__halo { fill: var(--lime); opacity: 0.16; transition: opacity 0.2s; }
+.worldmap__dot { fill: var(--lime); stroke: var(--navy); stroke-width: 1.5; transition: fill 0.2s; }
+.worldmap__n { fill: var(--navy); font-family: var(--font-display); pointer-events: none; }
+.worldmap__pin:hover .worldmap__halo { opacity: 0.4; }
+.worldmap__pin:hover .worldmap__dot { fill: #fff; }
+.worldmap__legend { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-block-start: 0.75rem; }
+.worldmap__legend a {
+  display: inline-flex; gap: 0.45rem; align-items: baseline; text-decoration: none;
+  border: 1px solid var(--rule-color); padding: 0.3rem 0.65rem;
+  font-size: var(--step--1); letter-spacing: 0.04em;
+}
+.worldmap__legend a:hover { background: var(--lime); border-color: var(--navy); }
+.worldmap__legend b { font-family: var(--font-display); font-size: var(--step-0); }
+.filter-note { margin-block-end: 1.25rem; font-size: var(--step--1); }
+.filter-note a { text-underline-offset: 3px; }
+
+/* --- Place chips ---------------------------------------------------------- */
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; padding: 0; margin: 0; }
+.chips a {
+  display: inline-flex; gap: 0.45rem; align-items: baseline; text-decoration: none;
+  border: 1px solid var(--rule-color); padding: 0.35rem 0.7rem;
+  font-size: var(--step--1); letter-spacing: 0.03em;
+}
+.chips a:hover { background: var(--lime); border-color: var(--navy); }
+.chips a[aria-current='true'] { background: var(--navy); color: var(--lime); border-color: var(--navy); }
+.chips b { font-family: var(--font-display); font-size: var(--step-0); }
+
+.mapdrop { margin-block-start: 1rem; }
+.mapdrop > summary {
+  cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: var(--step--1); letter-spacing: 0.1em; text-transform: uppercase;
+  border-block-end: 2px solid var(--accent); padding-block-end: 2px;
+}
+.mapdrop > summary::-webkit-details-marker { display: none; }
+.mapdrop > summary::after { content: '▾'; transition: transform 0.2s; }
+.mapdrop[open] > summary::after { transform: rotate(180deg); }
+.mapdrop__body { margin-block-start: 1rem; }
+
+/* --- Follow CTA ----------------------------------------------------------- */
+.follow { background: var(--lime); border-block: 2px solid var(--navy); padding-block: clamp(1.75rem, 4vw, 2.75rem); }
+.follow__inner { display: flex; flex-wrap: wrap; gap: 1.25rem 2rem; align-items: center; justify-content: space-between; }
+.follow__title { font-family: var(--font-display); font-size: var(--step-2); text-transform: uppercase; color: var(--navy); line-height: 1; }
+.follow__sub { color: var(--navy); opacity: 0.75; margin-block-start: 0.35rem; }
+.follow__btn {
+  display: inline-block; background: var(--navy); color: var(--lime);
+  padding: 0.85rem 1.5rem; text-decoration: none; white-space: nowrap;
+  font-size: var(--step--1); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;
+  border: 2px solid var(--navy);
+}
+.follow__btn:hover { background: var(--red); color: #fff; border-color: var(--red); }

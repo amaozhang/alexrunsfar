@@ -1,0 +1,25 @@
+---
+import { Image } from 'astro:assets';
+interface Photo { src: any; alt?: string; caption?: string; place?: string }
+interface Props { photos: Photo[]; lightbox?: boolean }
+const { photos, lightbox = false } = Astro.props;
+---
+{/* Masonry via CSS columns: photographs keep their true aspect ratio instead of
+    being cropped to a uniform tile. Half the library is portrait. */}
+<div class="pgrid">
+  {photos.map((p) => (
+    <figure class="pgrid__item" data-place={p.place}>
+      {lightbox ? (
+        <button type="button" aria-label={p.alt || 'View larger'}>
+          <Image src={p.src} alt={p.alt ?? ''} widths={[400, 700, 1100]}
+                 sizes="(min-width: 75rem) 30vw, (min-width: 45rem) 45vw, 92vw"
+                 loading="lazy" data-lb data-lb-full={p.src.src} data-lb-caption={p.caption ?? ''} />
+        </button>
+      ) : (
+        <Image src={p.src} alt={p.alt ?? ''} widths={[400, 700, 1100]}
+               sizes="(min-width: 75rem) 30vw, (min-width: 45rem) 45vw, 92vw" loading="lazy" />
+      )}
+      {p.caption && <figcaption>{p.caption}</figcaption>}
+    </figure>
+  ))}
+</div>

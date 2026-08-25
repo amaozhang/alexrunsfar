@@ -1,0 +1,19 @@
+---
+import { careerStats, type Race } from '../lib/races';
+interface Props { races: Race[]; }
+const s = careerStats(Astro.props.races);
+const items = [
+  { num: s.count, label: 'Ultras finished' },
+  { num: s.miles.toLocaleString(), label: 'Race miles' },
+  { num: s.longest, label: 'Longest (mi)' },
+  { num: s.firstYear ? `since ${s.firstYear}` : '—', label: 'Running far' },
+];
+---
+<div class="stats">
+  {items.map((i) => (
+    <div class="stat">
+      <span class="stat__num">{i.num}</span>
+      <span class="stat__label">{i.label}</span>
+    </div>
+  ))}
+</div>

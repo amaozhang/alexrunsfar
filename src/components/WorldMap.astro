@@ -1,0 +1,64 @@
+---
+import { WORLD_W, WORLD_H, WORLD_PATH, project } from '../data/world';
+import type { Cluster } from '../lib/places';
+
+interface Props { clusters: Cluster[]; pins: Cluster[]; href?: string }
+const { clusters, pins, href = '/photos' } = Astro.props;
+
+const max = Math.max(...pins.map((c) => c.count), 1);
+// Area-proportional radius, so 38 photos doesn't look 38x louder than 1.
+const r = (n: number) => 6 + 12 * Math.sqrt(n / max);
+
+/**
+ * Nudge overlapping pins apart. Lake Tahoe, Death Valley and Black Canyon sit
+ * within a few pixels of each other (and of Washington) at world scale, which
+ * buries their counts. A few relaxation passes separate them while keeping each
+ * pin close to its true position.
+ */
+const placed = pins.map((c) => {
+  const [x, y] = project(c.lon, c.lat);
+  return { c, x, y, r: r(c.count) };
+});
+for (let pass = 0; pass < 60; pass++) {
+  let moved = false;
+  for (let i = 0; i < placed.length; i++) {
+    for (let j = i + 1; j < placed.length; j++) {
+      const a = placed[i], b = placed[j];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const d = Math.hypot(dx, dy) || 0.01;
+      const need = a.r + b.r + 3;
+      if (d >= need) continue;
+      // Push the smaller pin further; the big one stays nearer the truth.
+      const push = (need - d) / 2;
+      const ux = dx / d, uy = dy / d;
+      const aShare = b.r / (a.r + b.r), bShare = a.r / (a.r + b.r);
+      a.x -= ux * push * 2 * aShare; a.y -= uy * push * 2 * aShare;
+      b.x += ux * push * 2 * bShare; b.y += uy * push * 2 * bShare;
+      moved = true;
+    }
+  }
+  if (!moved) break;
+}
+---
+<figure class="worldmap">
+  <svg viewBox={`0 0 ${WORLD_W} ${WORLD_H}`} role="img"
+       aria-label={`World map with ${clusters.length} photo locations: ${clusters.map((c) => `${c.name}, ${c.count}`).join('; ')}.`}>
+    <path class="worldmap__land" d={WORLD_PATH} />
+    {placed.map(({ c, x, y, r: rad }) => {
+      return (
+        <a href={`${href}?place=${c.id}`} class="worldmap__pin">
+          <circle class="worldmap__halo" cx={x} cy={y} r={rad + 5} />
+          <circle class="worldmap__dot" cx={x} cy={y} r={rad} />
+          <text class="worldmap__n" x={x} y={y + rad * 0.36} text-anchor="middle"
+                style={`font-size:${Math.max(9, Math.min(16, rad * 1.15)).toFixed(1)}px`}>{c.count}</text>
+          <title>{c.name} — {c.count} photo{c.count === 1 ? '' : 's'}</title>
+        </a>
+      );
+    })}
+  </svg>
+  <figcaption class="worldmap__legend">
+    {clusters.map((c) => (
+      <a href={`${href}?place=${c.id}`}><span>{c.name}</span> <b>{c.count}</b></a>
+    ))}
+  </figcaption>
+</figure>

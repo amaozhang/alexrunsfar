@@ -1,0 +1,130 @@
+---
+import Base from '../layouts/Base.astro';
+import RaceLedger from '../components/RaceLedger.astro';
+import PhotoStrip from '../components/PhotoStrip.astro';
+import Stats from '../components/Stats.astro';
+import Placeholder from '../components/Placeholder.astro';
+import { Image } from 'astro:assets';
+import HeroCarousel from '../components/HeroCarousel.astro';
+import FollowCta from '../components/FollowCta.astro';
+import { photoStream, heroPicks } from '../lib/photos';
+import { allRaces, nextRace, finished, place, fmtDate, careerStats, spell } from '../lib/races';
+import { site } from '../lib/site';
+import { getCollection } from 'astro:content';
+
+const races = await allRaces();
+const next = nextRace(races);
+const done = finished(races);
+// The hero slot on the homepage is the race Alex invented. If there ever isn't
+// one, fall back to any featured race and retitle the section accordingly.
+const selfMade = done.find((r) => r.data.selfCreated);
+const feature = selfMade ?? done.find((r) => r.data.featured) ?? done[0];
+const stats = careerStats(races);
+const featureTitle = feature?.data.selfCreated ? 'The one he made up' : 'Featured race';
+const recent = done.slice(0, 5);
+
+const posts = (await getCollection('writing'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+
+const stream = await photoStream();
+const hero = heroPicks(stream, 5);
+// Photos are the highest-volume content, so the homepage shows actual pictures.
+const recentPhotos = stream.slice(0, 14);
+
+// Marquee copy (Variant B) — driven by real data, not hard-coded like the old site.
+const ticker = next
+  ? `Next up: ${next.data.name} · ${fmtDate(next.data.date, { month: 'short' })} · ${next.data.city}, ${next.data.state}`
+  : `${done.length} ultras · ${done.reduce((s, r) => s + r.data.miles, 0).toLocaleString()} race miles`;
+---
+<Base>
+  <section class="hero">
+    <div class="hero__media"><HeroCarousel photos={hero} /></div>
+    <div class="wrap hero__body">
+      <h1 class="hero__title">Alex<br />Runs Far</h1>
+      <p class="hero__sub">{site.tagline} {spell(stats.count)[0].toUpperCase()}{spell(stats.count).slice(1)} ultras, one of them invented from scratch.</p>
+      {next && (
+        <a class="hero__next" href={`/races/${next.id}`}>
+          <span>Next race</span>
+          <strong>{next.data.name} — {fmtDate(next.data.date, { month: 'short' })}</strong>
+        </a>
+      )}
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      {Array.from({ length: 8 }).map(() => <span class="marquee__item">{ticker} ✦</span>)}
+    </div>
+  </div>
+
+  <div class="wrap section">
+    <Stats races={races} />
+  </div>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="section__head">
+        <h2 class="section__title">Photographs</h2>
+        <a class="more" href="/photos">All photos</a>
+      </div>
+      {recentPhotos.length ? (
+        <PhotoStrip photos={recentPhotos} />
+      ) : (
+        <p class="empty">No photos yet. Run <code>npm run photos &lt;folder&gt;</code>, then add an album.</p>
+      )}
+    </div>
+  </section>
+
+  {feature && (
+    <section class="wrap section">
+      <div class="section__head">
+        <h2 class="section__title">{featureTitle}</h2>
+        <a class="more" href={`/races/${feature.id}`}>Race details</a>
+      </div>
+      <div class="feature">
+        <div class="feature__media">
+          {feature.data.cover
+            ? <Image src={feature.data.cover} alt={feature.data.name} widths={[400, 800, 1200]} sizes="(min-width:52rem) 55vw, 100vw" />
+            : <Placeholder label="Race photo" />}
+        </div>
+        <div>
+          <h3 class="feature__title">{feature.data.name}</h3>
+          {feature.data.blurb && <p class="lede">{feature.data.blurb}</p>}
+          <dl class="feature__row">
+            <div><dt>Distance</dt><dd>{feature.data.distance}</dd></div>
+            {feature.data.time && <div><dt>Time</dt><dd>{feature.data.time}</dd></div>}
+            {place(feature) && <div><dt>Place</dt><dd>{place(feature)}</dd></div>}
+            <div><dt>Year</dt><dd>{feature.data.date.getUTCFullYear()}</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="wrap section">
+    <div class="section__head">
+      <h2 class="section__title">Races</h2>
+      <a class="more" href="/races">All {done.length} results</a>
+    </div>
+    <RaceLedger races={recent} />
+  </section>
+
+  <section class="wrap section">
+    <div class="section__head">
+      <h2 class="section__title">Writing</h2>
+      <a class="more" href="/writing">All writing</a>
+    </div>
+    <div class="grid grid--2">
+      {posts.map((p) => (
+        <a class="card" href={p.data.external ?? `/writing/${p.id}`}>
+          <h3 class="card__title">{p.data.title}</h3>
+          <p class="card__meta">{fmtDate(p.data.date)}{p.data.external && ' · Medium'}</p>
+          <p style="margin-block-start:0.6rem;color:var(--ink-soft)">{p.data.description}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+  <FollowCta />
+</Base>

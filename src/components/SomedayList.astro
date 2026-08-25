@@ -1,0 +1,26 @@
+---
+import { placeLabel, type Race } from '../lib/races';
+import { site } from '../lib/site';
+interface Props { races: Race[]; }
+const { races } = Astro.props;
+
+// These are invented routes, not events with a start line — the only way in is
+// to ask. Each card gets its own prefilled subject.
+const joinLink = (name: string) =>
+  `mailto:${site.email}?subject=${encodeURIComponent(`Joining you for ${name}`)}`;
+---
+<ul class="someday">
+  {races.map((race) => (
+    <li class="someday__item">
+      <a class="someday__body" href={`/races/${race.id}`}>
+        <span class="someday__dist">{race.data.distance}</span>
+        <h3 class="someday__name">{race.data.name}</h3>
+        <p class="someday__where">{placeLabel(race)}</p>
+        {race.data.blurb && <p class="someday__blurb">{race.data.blurb}</p>}
+      </a>
+      <a class="someday__cta" href={joinLink(race.data.name)}>
+        Want to join? Email me &rarr;
+      </a>
+    </li>
+  ))}
+</ul>

@@ -1,0 +1,68 @@
+---
+/**
+ * Click-to-enlarge overlay for the photo wall. Uses a native <dialog> so focus
+ * trapping, Esc-to-close and inertness of the page behind come from the
+ * platform rather than from script.
+ */
+---
+<dialog class="lb" aria-label="Photo viewer">
+  <div class="lb__bar">
+    <span class="lb__count" data-lb-count></span>
+    <button class="lb__close" type="button" aria-label="Close">&times;</button>
+  </div>
+  <button class="lb__nav lb__nav--prev" type="button" aria-label="Previous photo">&#8249;</button>
+  <figure class="lb__stage">
+    <img class="lb__img" alt="" />
+    <figcaption class="lb__cap"></figcaption>
+  </figure>
+  <button class="lb__nav lb__nav--next" type="button" aria-label="Next photo">&#8250;</button>
+</dialog>
+
+<script is:inline>
+  (function () {
+    const dlg = document.querySelector('.lb');
+    if (!dlg) return;
+    const img = dlg.querySelector('.lb__img');
+    const cap = dlg.querySelector('.lb__cap');
+    const counter = dlg.querySelector('[data-lb-count]');
+    let items = [], idx = 0, opener = null;
+
+    function collect() {
+      // Only what's actually on screen — a place filter hides the rest, and
+      // arrowing into a hidden photo is disorienting.
+      items = [...document.querySelectorAll('[data-lb]')].filter(
+        (el) => !el.closest('[hidden]'),
+      );
+    }
+    function show(i) {
+      if (!items.length) return;
+      idx = (i + items.length) % items.length;
+      const el = items[idx];
+      img.src = el.dataset.lbFull || el.currentSrc || el.src;
+      img.alt = el.alt || '';
+      const c = el.dataset.lbCaption || '';
+      cap.textContent = c;
+      cap.hidden = !c;
+      counter.textContent = `${idx + 1} / ${items.length}`;
+    }
+    document.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-lb]');
+      if (!t) return;
+      e.preventDefault();
+      collect();
+      opener = t;
+      show(items.indexOf(t));
+      dlg.showModal();
+    });
+    dlg.querySelector('.lb__close').addEventListener('click', () => dlg.close());
+    dlg.querySelector('.lb__nav--prev').addEventListener('click', () => show(idx - 1));
+    dlg.querySelector('.lb__nav--next').addEventListener('click', () => show(idx + 1));
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener('close', () => { opener?.focus(); });
+    document.addEventListener('keydown', (e) => {
+      if (!dlg.open) return;
+      if (e.key === 'ArrowRight') show(idx + 1);
+      if (e.key === 'ArrowLeft') show(idx - 1);
+    });
+  })();
+</script>

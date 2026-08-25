@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+import { fmtDate } from '../../lib/races';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('writing');
+  // External (Medium) posts have no local page — the index links straight out.
+  return posts
+    .filter((p) => !p.data.draft && !p.data.external)
+    .map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<Base title={post.data.title} description={post.data.description}>
+  <div class="wrap wrap--narrow page-head">
+    <p class="eyebrow">{fmtDate(post.data.date)}</p>
+    <h1 class="page-title">{post.data.title}</h1>
+    <p class="lede">{post.data.description}</p>
+  </div>
+  <div class="wrap wrap--narrow section">
+    <article class="prose"><Content /></article>
+  </div>
+</Base>

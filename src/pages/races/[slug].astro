@@ -1,0 +1,92 @@
+---
+import Base from '../../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import { loadTrack } from '../../lib/gpx';
+import RouteMap from '../../components/RouteMap.astro';
+import ElevationProfile from '../../components/ElevationProfile.astro';
+import { place, resultsUrl, resultsLabel, fmtDate, placeLabel } from '../../lib/races';
+
+export async function getStaticPaths() {
+  const races = await getCollection('races');
+  return races.map((race) => ({ params: { slug: race.id }, props: { race } }));
+}
+
+const { race } = Astro.props;
+const { Content } = await render(race);
+const d = race.data;
+
+// Any photo album tagged with this race slug.
+const albums = (await getCollection('albums')).filter((a) => a.data.race === race.id);
+const hasReport = (race.body ?? '').trim().length > 0;
+const track = d.track ? loadTrack(d.track, d.gainFt) : undefined;
+
+const someday = d.status === 'someday';
+const facts = ([
+  d.date ? ['Date', fmtDate(d.date)] : ['Date', 'Not scheduled'],
+  ['Where', placeLabel(race) || 'TBD'],
+  ['Distance', d.distance],
+  d.gainFt ? ['Climb', `${d.gainFt.toLocaleString()} ft`] : null,
+  d.time ? ['Time', d.time] : null,
+  place(race)
+    ? ['Overall', d.finishers ? `${place(race)} of ${d.finishers}` : place(race)!]
+    : null,
+  d.divisionPlace && d.division
+    ? ['Division', `${d.divisionPlace}${['th','st','nd','rd'][((d.divisionPlace % 100) - 20) % 10] ?? ['th','st','nd','rd'][d.divisionPlace % 100] ?? 'th'} · ${d.division}`]
+    : null,
+  d.ultrasignupRank ? ['UltraSignup rank', `${(d.ultrasignupRank * 100).toFixed(1)}%`] : null,
+].filter(Boolean)) as [string, string][];
+---
+<Base title={d.name} description={d.blurb ?? `${d.name} — ${d.distance}, ${fmtDate(d.date)}`}>
+  <div class="wrap page-head">
+    <p class="eyebrow">{someday ? 'Someday' : d.status === 'upcoming' ? 'Upcoming' : d.date?.getUTCFullYear()} · {d.distance}</p>
+    <h1 class="page-title">{d.name}</h1>
+    {d.blurb && <p class="lede">{d.blurb}</p>}
+  </div>
+
+  <div class="wrap">
+    <dl class="feature__row" style="margin:0">
+      {facts.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+    </dl>
+    {resultsUrl(race) && (
+      <p style="margin-block-start:1.25rem">
+        <a class="more" href={resultsUrl(race)} rel="noopener">{resultsLabel(race)}</a>
+      </p>
+    )}
+  </div>
+
+  {track && (
+    <section class="wrap section">
+      <div class="coursegrid">
+        <RouteMap track={track} />
+        {track.hasElevation
+          ? <ElevationProfile track={track} label={d.trackLabel ?? 'Elevation'} />
+          : <p class="empty">Route only — this file carries no usable elevation data.</p>}
+      </div>
+      {d.trackNote && <p class="card__meta" style="margin-block-start:0.9rem">{d.trackNote}</p>}
+    </section>
+  )}
+
+  <div class="wrap wrap--narrow section">
+    {hasReport ? (
+      <article class="prose"><Content /></article>
+    ) : (
+      <p class="empty">
+        {someday
+          ? 'Not run yet. When it happens, the report goes in the body of this file.'
+          : `No race report for this one yet — write it in the body of src/content/races/${race.id}.md.`}
+      </p>
+    )}
+  </div>
+
+  {albums.length > 0 && (
+    <section class="wrap section">
+      <div class="section__head"><h2 class="section__title">Photos</h2></div>
+      <div class="grid grid--3">
+        {albums.flatMap((a) => a.data.photos).map((p) => (
+          <figure class="card__media"><Image src={p.src} alt={p.alt} widths={[300, 600]} sizes="(min-width:52rem) 30vw, 100vw" loading="lazy" /></figure>
+        ))}
+      </div>
+    </section>
+  )}
+</Base>

@@ -1,0 +1,13 @@
+---
+import type { Cluster } from '../lib/places';
+interface Props { clusters: Cluster[]; total: number }
+const { clusters, total } = Astro.props;
+---
+{/* The filter itself, independent of the map. Costs one line of vertical space
+    and needs no explanation — you land on photographs, not on a map. */}
+<ul class="chips">
+  <li><a href="/photos" data-chip="" aria-current="true">All <b>{total}</b></a></li>
+  {clusters.map((c) => (
+    <li><a href={`?place=${c.id}`} data-chip={c.id}>{c.name} <b>{c.count}</b></a></li>
+  ))}
+</ul>

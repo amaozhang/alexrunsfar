@@ -1,0 +1,39 @@
+---
+import { place, resultsUrl, fmtDate, placeLabel, type Race } from '../lib/races';
+interface Props { races: Race[]; }
+const { races } = Astro.props;
+---
+<table class="ledger">
+  <thead>
+    <tr>
+      <th scope="col">Race</th>
+      <th scope="col">Distance</th>
+      <th scope="col" class="ledger__num">Time</th>
+      <th scope="col" class="ledger__num">Place</th>
+    </tr>
+  </thead>
+  <tbody>
+    {races.map((race) => (
+      <tr>
+        <td>
+          <div class="ledger__name">
+            <a href={`/races/${race.id}`}>{race.data.name}</a>
+            {race.data.selfCreated && <span class="tag tag--self">Self-made</span>}
+            {race.data.status === 'upcoming' && <span class="tag tag--next">Upcoming</span>}
+          </div>
+          <div class="ledger__meta">
+            {race.data.date && <>{fmtDate(race.data.date, { month: 'short' })} · </>}{placeLabel(race)}
+          </div>
+        </td>
+        <td>{race.data.distance}</td>
+        <td class="ledger__num ledger__time" data-label="Time">{race.data.time ?? '—'}</td>
+        <td class="ledger__num" data-label="Place">
+          {place(race) ?? (race.data.selfCreated ? 'N/A' : '—')}
+          {resultsUrl(race) && (
+            <> <a href={resultsUrl(race)} class="sr">Full results for {race.data.name}</a></>
+          )}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>

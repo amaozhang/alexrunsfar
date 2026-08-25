@@ -1,0 +1,53 @@
+---
+import { Image } from 'astro:assets';
+interface Props { photos: { src: any; alt?: string }[] }
+const { photos } = Astro.props;
+---
+{/* Crossfade rather than a slide: the type sits on top of these, and sliding
+    drags the eye sideways while you're trying to read a name. */}
+<div class="carousel" data-carousel>
+  {photos.map((p, i) => (
+    <div class="carousel__slide" data-active={i === 0 ? '' : undefined} aria-hidden={i !== 0}>
+      <Image src={p.src} alt={i === 0 ? (p.alt ?? '') : ''} widths={[900, 1400, 2000]}
+             sizes="100vw" loading={i === 0 ? 'eager' : 'lazy'}
+             fetchpriority={i === 0 ? 'high' : undefined} />
+    </div>
+  ))}
+  {photos.length > 1 && (
+    <div class="carousel__dots" role="tablist" aria-label="Choose photo">
+      {photos.map((_, i) => (
+        <button type="button" role="tab" data-i={i} aria-selected={i === 0}
+                aria-label={`Photo ${i + 1}`}></button>
+      ))}
+    </div>
+  )}
+</div>
+
+<script is:inline>
+  (function () {
+    const box = document.querySelector('[data-carousel]');
+    if (!box) return;
+    const slides = [...box.querySelectorAll('.carousel__slide')];
+    const dots = [...box.querySelectorAll('.carousel__dots button')];
+    if (slides.length < 2) return;
+    let i = 0, timer;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function go(n) {
+      i = (n + slides.length) % slides.length;
+      slides.forEach((s, k) => {
+        s.toggleAttribute('data-active', k === i);
+        s.setAttribute('aria-hidden', String(k !== i));
+      });
+      dots.forEach((d, k) => d.setAttribute('aria-selected', String(k === i)));
+    }
+    function start() { if (!reduced) timer = setInterval(() => go(i + 1), 6000); }
+    function stop() { clearInterval(timer); }
+
+    dots.forEach((d) => d.addEventListener('click', () => { stop(); go(+d.dataset.i); start(); }));
+    box.addEventListener('pointerenter', stop);
+    box.addEventListener('pointerleave', start);
+    document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
+    start();
+  })();
+</script>

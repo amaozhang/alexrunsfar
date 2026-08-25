@@ -1,0 +1,87 @@
+---
+import Base from '../../layouts/Base.astro';
+import PhotoGrid from '../../components/PhotoGrid.astro';
+import Lightbox from '../../components/Lightbox.astro';
+import { photoStream } from '../../lib/photos';
+import { clusterPhotos, mapPins } from '../../lib/places';
+import WorldMap from '../../components/WorldMap.astro';
+import PlaceChips from '../../components/PlaceChips.astro';
+import { fmtDate } from '../../lib/races';
+
+const photos = await photoStream();
+const clusters = clusterPhotos(photos);
+const pins = mapPins(clusters);
+const placeOf = new Map<any, string>();
+for (const c of clusters) for (const ph of c.photos) placeOf.set(ph, c.id);
+const tagged = photos.map((p) => ({ ...p, place: placeOf.get(p) }));
+const placeNames = Object.fromEntries(clusters.map((c) => [c.id, c.name]));
+const newest = photos[0]?.date ?? photos[0]?.albumDate;
+const oldest = photos[photos.length - 1]?.date ?? photos[photos.length - 1]?.albumDate;
+---
+<Base title="Photos" description="Landscape photography from trail runs, hikes, and races.">
+  <div class="wrap page-head">
+    <p class="eyebrow">{photos.length} photographs</p>
+    <h1 class="page-title">Photos</h1>
+    <p class="lede">Trail runs, hikes, and races — mostly the mountains, occasionally the people.</p>
+    {newest && oldest && (
+      <p class="card__meta">{fmtDate(oldest, { month: 'short' })} — {fmtDate(newest, { month: 'short' })}</p>
+    )}
+  </div>
+
+  {clusters.length > 1 && (
+    <div class="wrap" style="padding-block-end:1.5rem">
+      <PlaceChips clusters={clusters} total={photos.length} />
+      <details class="mapdrop">
+        <summary>Show map</summary>
+        <div class="mapdrop__body"><WorldMap clusters={clusters} pins={pins} href="" /></div>
+      </details>
+    </div>
+  )}
+
+  <div class="wrap section" id="stream">
+    <p class="filter-note" hidden>
+      Showing <b data-count></b> from <b data-place></b>. <a href="/photos">Show all</a>
+    </p>
+    {photos.length
+      ? <PhotoGrid photos={tagged} lightbox />
+      : <p class="empty">No photos yet. Run <code>npm run photos &lt;folder&gt; &lt;prefix&gt;</code>.</p>}
+  </div>
+
+  <Lightbox />
+
+  <script is:inline define:vars={{ placeNames }}>
+    (function () {
+      const place = new URLSearchParams(location.search).get('place');
+      const note = document.querySelector('.filter-note');
+      const items = [...document.querySelectorAll('.pgrid__item')];
+      function apply(p) {
+        let shown = 0;
+        for (const el of items) {
+          const hit = !p || el.dataset.place === p;
+          el.hidden = !hit;
+          if (hit) shown++;
+        }
+        document.querySelectorAll('[data-chip]').forEach((c) =>
+          c.setAttribute('aria-current', String((c.dataset.chip || '') === (p || ''))));
+        if (note) {
+          note.hidden = !p;
+          if (p) {
+            note.querySelector('[data-count]').textContent = shown;
+            note.querySelector('[data-place]').textContent = placeNames[p] || p;
+          }
+        }
+      }
+      apply(place);
+      // Map pins are same-page links; filter without a reload.
+      document.addEventListener('click', (e) => {
+        const a = e.target.closest('a[href*="?place="]');
+        if (!a) return;
+        e.preventDefault();
+        const p = new URL(a.href, location.origin).searchParams.get('place');
+        history.replaceState(null, '', p ? `?place=${p}#stream` : '/photos');
+        apply(p);
+        document.getElementById('stream')?.scrollIntoView({ behavior: 'smooth' });
+      });
+    })();
+  </script>
+</Base>

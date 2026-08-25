@@ -1,0 +1,45 @@
+---
+import Base from '../../layouts/Base.astro';
+import RaceLedger from '../../components/RaceLedger.astro';
+import SomedayList from '../../components/SomedayList.astro';
+import Stats from '../../components/Stats.astro';
+import { allRaces, somedayRaces, nextRace, finished } from '../../lib/races';
+import { site } from '../../lib/site';
+
+const races = await allRaces();
+const someday = await somedayRaces();
+const next = nextRace(races);
+const done = finished(races);
+---
+<Base title="Races" description="Every ultra Alex Zhang has run, with times and placings.">
+  <div class="wrap page-head">
+    <p class="eyebrow">Results</p>
+    <h1 class="page-title">Races</h1>
+    <p class="lede">Every ultra, newest first. Times and placings from UltraSignup; Zhanghattan is self-timed because Alex made it up.</p>
+    <p style="margin-block-start:1rem"><a class="more" href={site.links.ultrasignup} rel="noopener">Full results history on UltraSignup</a></p>
+  </div>
+
+  <div class="wrap"><Stats races={races} /></div>
+
+  {next && (
+    <section class="wrap section">
+      <div class="section__head"><h2 class="section__title">On the calendar</h2></div>
+      <RaceLedger races={[next]} />
+    </section>
+  )}
+
+  <section class="wrap section">
+    <div class="section__head"><h2 class="section__title">Finished</h2></div>
+    <RaceLedger races={done} />
+  </section>
+
+  {someday.length > 0 && (
+    <section class="wrap section">
+      <div class="section__head">
+        <h2 class="section__title">Someday</h2>
+        <span class="card__meta">No date. Just intent.</span>
+      </div>
+      <SomedayList races={someday} />
+    </section>
+  )}
+</Base>

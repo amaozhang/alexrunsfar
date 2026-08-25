@@ -1,0 +1,39 @@
+---
+import { downsample, type Track } from '../lib/gpx';
+
+interface Props { track: Track; showWaypoints?: boolean }
+const { track, showWaypoints = true } = Astro.props;
+
+const pts = downsample(track.points, 1400);
+const lats = pts.map((p) => p.lat), lons = pts.map((p) => p.lon);
+const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+const minLon = Math.min(...lons), maxLon = Math.max(...lons);
+
+// Equirectangular, with longitude squeezed by cos(lat) so the trace keeps its
+// true proportions instead of stretching east-west.
+const midLat = (minLat + maxLat) / 2;
+const kx = Math.cos((midLat * Math.PI) / 180);
+const w = (maxLon - minLon) * kx, h = maxLat - minLat;
+const PAD = 0.06;
+const scale = 1000 / Math.max(w, h);
+const W = w * scale + 1000 * PAD * 2;
+const H = h * scale + 1000 * PAD * 2;
+const px = (lon: number) => (lon - minLon) * kx * scale + 1000 * PAD;
+const py = (lat: number) => (maxLat - lat) * scale + 1000 * PAD;
+
+const d = pts.map((p, i) => `${i ? 'L' : 'M'}${px(p.lon).toFixed(1)},${py(p.lat).toFixed(1)}`).join('');
+const start = pts[0], end = pts[pts.length - 1];
+// A loop course ends where it starts — only draw one marker if so.
+const isLoop = Math.hypot(px(end.lon) - px(start.lon), py(end.lat) - py(start.lat)) < 12;
+const wpts = showWaypoints ? track.waypoints.filter((w) => !/^\d+$/.test(w.name)) : [];
+---
+<figure class="routemap">
+  <svg viewBox={`0 0 ${W.toFixed(0)} ${H.toFixed(0)}`} role="img"
+       aria-label={`Course map: ${track.miles.toFixed(1)} miles${isLoop ? ', a loop' : ', point to point'}.`}>
+    <path class="routemap__shadow" d={d} />
+    <path class="routemap__line" d={d} />
+    {wpts.map((w) => <circle class="routemap__wpt" cx={px(w.lon)} cy={py(w.lat)} r="5"><title>{w.name}</title></circle>)}
+    <circle class="routemap__start" cx={px(start.lon)} cy={py(start.lat)} r="9" />
+    {!isLoop && <circle class="routemap__end" cx={px(end.lon)} cy={py(end.lat)} r="9" />}
+  </svg>
+</figure>

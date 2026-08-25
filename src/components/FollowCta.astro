@@ -1,0 +1,17 @@
+---
+import { site } from '../lib/site';
+---
+{/* Strava is the only one of the three that's a *follow* — an ongoing
+    relationship. UltraSignup is a record you check, LinkedIn is a different
+    life. Giving all three the same treatment is why none of them lands. */}
+<section class="follow">
+  <div class="wrap follow__inner">
+    <div>
+      <h2 class="follow__title">Follow along</h2>
+      <p class="follow__sub">Every run ends up on Strava, training and all.</p>
+    </div>
+    <a class="follow__btn" href={site.links.strava} rel="noopener">
+      Follow on Strava &rarr;
+    </a>
+  </div>
+</section>
