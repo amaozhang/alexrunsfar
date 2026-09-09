@@ -16,6 +16,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
   <title>{pageTitle}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={new URL(path, site.url)} />
+  <link rel="alternate" type="application/rss+xml" title={site.title} href="/rss.xml" />
   <meta property="og:title" content={pageTitle} />
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
@@ -48,7 +49,8 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
       <p>
         <a href={site.links.strava}>Strava</a> ·
         <a href={site.links.ultrasignup}>UltraSignup</a> ·
-        <a href={site.links.linkedin}>LinkedIn</a>
+        <a href={site.links.linkedin}>LinkedIn</a> ·
+        <a href="/rss.xml">RSS</a>
       </p>
     </div>
   </footer>

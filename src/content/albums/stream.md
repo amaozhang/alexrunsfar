@@ -1,9 +1,14 @@
 ---
 title: Trail
-date: 2026-07-29
+date: 2026-09-04
 kind: other
-cover: ../../assets/photos/arf-20260729-img9379.jpg
+cover: ../../assets/photos/arf-20260904-img9788.jpg
 photos:
+  - src: ../../assets/photos/arf-20260904-img9788.jpg
+    date: 2026-09-04
+    lat: 46.77
+    lon: -121.73
+    alt: ""
   - src: ../../assets/photos/arf-20260729-img9379.jpg
     date: 2026-07-29
     lat: 47.44

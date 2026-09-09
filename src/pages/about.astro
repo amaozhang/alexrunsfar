@@ -3,11 +3,10 @@ import Base from '../layouts/Base.astro';
 import Stats from '../components/Stats.astro';
 import { Image } from 'astro:assets';
 import portrait from '../assets/site/portrait.png';
-import { allRaces, careerStats, spell } from '../lib/races';
-import { site, bioWith } from '../lib/site';
+import { allRaces } from '../lib/races';
+import { site } from '../lib/site';
 
 const races = await allRaces();
-const stats = careerStats(races);
 ---
 <Base title="About">
   <div class="wrap page-head">
@@ -19,10 +18,14 @@ const stats = careerStats(races);
     <div class="feature">
       <div class="feature__media"><Image src={portrait} alt="Alex Zhang" widths={[400, 800]} sizes="(min-width:52rem) 45vw, 100vw" /></div>
       <div class="prose">
-        <p>{bioWith(spell(stats.count))}</p>
         <p>
-          He runs out of Seattle now, mostly on the trails east of the city. Before that it was
-          Brooklyn and Prospect Park.
+          Hello, I’m Alex and I run ultras. Mostly one or two a year, some organized races and
+          others that I come up with myself.
+        </p>
+        <p>
+          I run out of Seattle for now, familiarizing myself with the trails east of the city.
+          Before that it was Brooklyn, the West Side Highway and that one “big” hill in
+          Prospect Park.
         </p>
         <p style="margin-block-start:1.75rem">
           <a class="follow__btn" href={site.links.strava} rel="noopener">Follow on Strava &rarr;</a>
